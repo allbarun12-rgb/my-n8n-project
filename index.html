@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My n8n Dashboard</title>
+    <style>
+        /* 깔끔하고 트렌디한 디자인 */
+        body { 
+            font-family: 'Pretendard', sans-serif; 
+            background-color: #f8f9fa; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+        }
+        .container { 
+            background: white; 
+            padding: 2rem; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
+            width: 90%; 
+            max-width: 400px; 
+            text-align: center; 
+        }
+        h1 { color: #333; font-size: 1.5rem; margin-bottom: 1.5rem; }
+        #data-box { 
+            background: #f1f3f5; 
+            padding: 1rem; 
+            border-radius: 10px; 
+            min-height: 100px; 
+            margin-bottom: 1.5rem; 
+            text-align: left;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        button { 
+            background: #007bff; 
+            color: white; 
+            border: none; 
+            padding: 0.8rem 1.5rem; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>n8n 데이터 모니터</h1>
+        <div id="data-box">여기에 데이터가 표시됩니다.</div>
+        <button onclick="getData()">데이터 불러오기</button>
+    </div>
+
+    <script>
+        async function getData() {
+            const dataBox = document.getElementById('data-box');
+            dataBox.innerText = "데이터 요청 중...";
+
+            // ⚠️ 나중에 n8n Webhook URL이 생기면 아래 주소를 교체하세요!
+            const N8N_URL = 'https://your-n8n-webhook-url.com';
+
+            try {
+                const response = await fetch(N8N_URL);
+                const result = await response.json();
+                dataBox.innerText = JSON.stringify(result, null, 2);
+            } catch (error) {
+                dataBox.innerText = "에러: URL이 연결되지 않았거나 CORS 설정이 필요합니다.";
+            }
+        }
+    </script>
+</body>
+</html>
