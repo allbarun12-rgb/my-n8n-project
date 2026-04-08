@@ -1,198 +1,104 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Loader2 } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이종민코퍼레이션 - 통합 대시보드</title>
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Pretendard:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root { --mint: #b2f2bb; --pink: #ffc9c9; --yellow: #fff3bf; --dark: #2d3436; }
+        body { margin: 0; background: linear-gradient(135deg, var(--mint), var(--pink)); font-family: 'Pretendard', sans-serif; min-height: 100vh; padding: 40px; box-sizing: border-box; display: flex; justify-content: center; }
+        
+        /* 전체 화면을 넓게 쓰기 위한 컨테이너 */
+        .main-container { width: 100%; max-width: 1400px; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(15px); border: 5px solid white; border-radius: 50px; padding: 60px; box-shadow: 0 30px 60px rgba(0,0,0,0.1); }
+        
+        .header { text-align: center; margin-bottom: 50px; }
+        .logo { font-family: 'Black Han Sans', sans-serif; font-size: 4rem; color: var(--dark); text-shadow: 5px 5px 0px var(--yellow); margin: 0; }
+        
+        .section-wrapper { display: flex; flex-direction: column; gap: 50px; }
+        
+        /* 카드 내부를 좌우로 나누는 플렉스 박스 */
+        .card { background: white; border: 5px solid var(--dark); border-radius: 40px; padding: 40px; box-shadow: 15px 15px 0px var(--dark); display: flex; gap: 40px; align-items: stretch; }
+        
+        /* 왼쪽: 입력 영역 */
+        .input-side { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        
+        /* 오른쪽: 결과 영역 */
+        .result-side { flex: 1.2; }
 
-/**
- * Design Philosophy: Modern Professional with Asymmetric Layout
- * - Asymmetric grid: Left 40% (input form), Right 60% (results)
- * - Professional blue color scheme (#1e40af primary)
- * - Clear information flow: Input → Process → Results
- * - Subtle shadows and spacing for depth
- */
+        h2 { font-size: 2.2rem; margin-top: 0; margin-bottom: 10px; }
+        .hint-text { color: #666; font-size: 1.2rem; margin-bottom: 25px; font-weight: bold; }
+        
+        input { width: 100%; padding: 22px; border: 4px solid #eee; border-radius: 25px; margin-bottom: 25px; font-size: 1.3rem; box-sizing: border-box; transition: 0.3s; }
+        input:focus { border-color: var(--dark); outline: none; }
+        
+        .btn { width: 100%; border: 5px solid var(--dark); padding: 22px; border-radius: 60px; font-size: 1.6rem; font-weight: 900; cursor: pointer; box-shadow: 7px 7px 0px var(--dark); transition: 0.1s; }
+        .btn:active { transform: translate(4px, 4px); box-shadow: 0px 0px 0px var(--dark); }
 
-export default function Home() {
-  const [productInput, setProductInput] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+        /* 결과창 스타일 - 사진처럼 점선 테두리 */
+        .result-area { background: #fff; border: 4px dashed var(--mint); border-radius: 30px; height: 100%; min-height: 350px; padding: 30px; font-size: 1.2rem; color: #444; white-space: pre-wrap; box-sizing: border-box; }
 
-  const handleGenerateReport = async (type: 'report' | 'story') => {
-    if (!productInput.trim()) {
-      setError('제품명을 입력해주세요.');
-      return;
-    }
+        /* 반응형: 화면이 좁아지면 다시 위아래로 */
+        @media (max-width: 1000px) {
+            .card { flex-direction: column; }
+            .result-area { min-height: 250px; }
+        }
+    </style>
+</head>
+<body>
 
-    setLoading(true);
-    setError(null);
-    setResult(null);
-
-    try {
-      // n8n 웹훅 URL
-      const N8N_WEBHOOK_URL = 'https://allbarun7.app.n8n.cloud/webhook/your-id';
-
-      const response = await fetch(N8N_WEBHOOK_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          product: productInput,
-          type: type,
-          timestamp: new Date().toISOString(),
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      setResult(data.result || JSON.stringify(data, null, 2));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : '요청 처리 중 오류가 발생했습니다.');
-      console.error('Error:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
-      {/* Header */}
-      <header className="border-b border-gray-200 bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <h1 className="text-3xl font-bold text-blue-900">JM코퍼레이션</h1>
-          <p className="text-gray-600 mt-1">지능형 보고서 생성 시스템</p>
+    <div class="main-container">
+        <div class="header">
+            <h1 class="logo">이종민코퍼레이션</h1>
+            <p style="font-weight: bold; color: #555; font-size: 1.4rem; margin-top: 15px;">Smart AI Enterprise Dashboard</p>
         </div>
-      </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          {/* Left Section - Input Form (40%) */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-md p-8 sticky top-8">
-              <div className="mb-8">
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                  보고서 생성
-                </h2>
-                <p className="text-gray-600 text-sm">
-                  원하는 제품이름을 입력하세요
-                </p>
-              </div>
-
-              {/* Input Field */}
-              <div className="mb-6">
-                <label htmlFor="product" className="block text-sm font-medium text-gray-700 mb-2">
-                  제품명
-                </label>
-                <Input
-                  id="product"
-                  type="text"
-                  placeholder="예: iPhone 15 Pro"
-                  value={productInput}
-                  onChange={(e) => setProductInput(e.target.value)}
-                  disabled={loading}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter' && !loading) {
-                      handleGenerateReport('report');
-                    }
-                  }}
-                />
-              </div>
-
-              {/* Error Message */}
-              {error && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-sm text-red-700">{error}</p>
+        <div class="section-wrapper">
+            <div class="card">
+                <div class="input-side">
+                    <h2>📦 제품보고서 생성</h2>
+                    <div class="hint-text">생성할 제품의 이름을 입력해주세요.</div>
+                    <input type="text" id="product-name" placeholder="원하는 제품이름을 입력하세요">
+                    <button class="btn" style="background: var(--yellow);" onclick="callN8n('product')">보고서 톡톡!</button>
                 </div>
-              )}
-
-              {/* Action Buttons */}
-              <div className="space-y-3">
-                <Button
-                  onClick={() => handleGenerateReport('report')}
-                  disabled={loading || !productInput.trim()}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
-                >
-                  {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-                  {loading ? '생성 중...' : '제품보고서'}
-                </Button>
-                <Button
-                  onClick={() => handleGenerateReport('story')}
-                  disabled={loading || !productInput.trim()}
-                  className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
-                >
-                  {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-                  {loading ? '생성 중...' : '스토리만들기'}
-                </Button>
-              </div>
-
-              {/* Info Text */}
-              <p className="text-xs text-gray-500 mt-6 text-center">
-                n8n과 연동하여 실시간으로 보고서를 생성합니다
-              </p>
+                <div class="result-side">
+                    <div class="result-area" id="product-result">결과화면</div>
+                </div>
             </div>
-          </div>
 
-          {/* Right Section - Results (60%) */}
-          <div className="lg:col-span-3">
-            <div className="bg-white rounded-lg shadow-md p-8 min-h-96">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">
-                결과화면
-              </h2>
-
-              {!result && !loading && (
-                <div className="flex items-center justify-center h-64 text-center">
-                  <div>
-                    <p className="text-gray-500 mb-2">
-                      좌측에서 제품명을 입력하고
-                    </p>
-                    <p className="text-gray-500">
-                      버튼을 클릭하면 결과가 표시됩니다
-                    </p>
-                  </div>
+            <div class="card">
+                <div class="input-side">
+                    <h2>🎬 스토리 만들기</h2>
+                    <div class="hint-text">어떤 상황의 스토리를 원하시나요?</div>
+                    <input type="text" id="story-context" placeholder="원하는 상황을 입력하세요">
+                    <button class="btn" style="background: var(--mint);" onclick="callN8n('story')">스토리 톡톡!</button>
                 </div>
-              )}
-
-              {loading && (
-                <div className="flex items-center justify-center h-64">
-                  <div className="text-center">
-                    <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-                    <p className="text-gray-600">보고서를 생성하고 있습니다...</p>
-                  </div>
+                <div class="result-side">
+                    <div class="result-area" id="story-result">결과화면</div>
                 </div>
-              )}
-
-              {result && !loading && (
-                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                  <div className="bg-gray-50 rounded-lg p-6 max-h-96 overflow-y-auto">
-                    <pre className="text-sm text-gray-800 whitespace-pre-wrap break-words font-mono">
-                      {result}
-                    </pre>
-                  </div>
-                  <Button
-                    onClick={() => {
-                      const element = document.createElement('a');
-                      element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(result));
-                      element.setAttribute('download', `report_${new Date().getTime()}.txt`);
-                      element.style.display = 'none';
-                      document.body.appendChild(element);
-                      element.click();
-                      document.body.removeChild(element);
-                    }}
-                    className="mt-4 w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200"
-                  >
-                    결과 다운로드
-                  </Button>
-                </div>
-              )}
             </div>
-          </div>
         </div>
-      </main>
     </div>
-  );
-}
+
+    <script>
+        async function callN8n(type) {
+            const input = document.getElementById(type === 'product' ? 'product-name' : 'story-context').value;
+            const resultBox = document.getElementById(type === 'product' ? 'product-result' : 'story-result');
+            
+            if(!input) return alert("내용을 입력해주세요!");
+            resultBox.innerText = "AI가 작성 중입니다... 🚀";
+
+            // 실제 n8n URL로 수정하여 사용하세요.
+            const URL = 'https://allbarun7.app.n8n.cloud/webhook/your-id';
+
+            try {
+                const res = await fetch(`${URL}?type=${type}&query=${encodeURIComponent(input)}`);
+                const data = await res.json();
+                resultBox.innerText = data.output || JSON.stringify(data);
+            } catch (e) {
+                resultBox.innerText = "에러 발생: n8n 연결 상태를 확인하세요.";
+            }
+        }
+    </script>
+</body>
+</html>
