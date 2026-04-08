@@ -3,74 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My n8n Dashboard</title>
+    <title>이종민코퍼레이션 - 스마트 대시보드</title>
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Pretendard:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* 깔끔하고 트렌디한 디자인 */
-        body { 
-            font-family: 'Pretendard', sans-serif; 
-            background-color: #f8f9fa; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            margin: 0; 
-        }
-        .container { 
-            background: white; 
-            padding: 2rem; 
-            border-radius: 20px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
-            width: 90%; 
-            max-width: 400px; 
-            text-align: center; 
-        }
-        h1 { color: #333; font-size: 1.5rem; margin-bottom: 1.5rem; }
-        #data-box { 
-            background: #f1f3f5; 
-            padding: 1rem; 
-            border-radius: 10px; 
-            min-height: 100px; 
-            margin-bottom: 1.5rem; 
-            text-align: left;
-            font-family: monospace;
-            white-space: pre-wrap;
-            word-break: break-all;
-        }
-        button { 
-            background: #007bff; 
-            color: white; 
-            border: none; 
-            padding: 0.8rem 1.5rem; 
-            border-radius: 10px; 
-            cursor: pointer; 
-            font-weight: bold;
-            transition: 0.3s;
-        }
-        button:hover { background: #0056b3; }
+        :root { --mint: #b2f2bb; --pink: #ffc9c9; --yellow: #fff3bf; --dark: #2d3436; }
+        body { margin: 0; background: linear-gradient(135deg, var(--mint), var(--pink)); font-family: 'Pretendard', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        
+        .container { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(15px); border: 5px solid white; border-radius: 40px; padding: 30px; width: 100%; max-width: 500px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
+        
+        .logo { font-family: 'Black Han Sans', sans-serif; font-size: 1.8rem; color: var(--dark); margin-bottom: 5px; text-align: center; }
+        .sub-logo { font-size: 0.9rem; color: #666; text-align: center; margin-bottom: 25px; }
+
+        .section { background: white; border: 3px solid var(--dark); border-radius: 25px; padding: 20px; margin-bottom: 20px; box-shadow: 6px 6px 0px var(--dark); }
+        h2 { font-size: 1.2rem; margin-top: 0; color: #333; display: flex; align-items: center; }
+        
+        input { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 12px; margin: 10px 0; box-sizing: border-box; font-size: 1rem; }
+        input:focus { border-color: var(--dark); outline: none; }
+
+        .result-box { background: #f8f9fa; border-radius: 15px; padding: 15px; min-height: 80px; margin-top: 10px; font-size: 0.9rem; color: #555; border: 1px solid #ddd; white-space: pre-wrap; }
+
+        .btn { width: 100%; background: var(--yellow); border: 3px solid var(--dark); padding: 12px; border-radius: 50px; font-weight: 900; cursor: pointer; box-shadow: 4px 4px 0px var(--dark); transition: 0.1s; margin-top: 10px; }
+        .btn:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0px var(--dark); }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>n8n 데이터 모니터</h1>
-        <div id="data-box">여기에 데이터가 표시됩니다.</div>
-        <button onclick="getData()">데이터 불러오기</button>
+        <div class="logo">이종민코퍼레이션</div>
+        <div class="sub-logo">Smart AI Dashboard</div>
+
+        <div class="section">
+            <h2>📦 제품보고서 [cite: 1]</h2>
+            <input type="text" id="product-name" placeholder="원하는 제품이름을 입력하세요 [cite: 2]">
+            <button class="btn" onclick="requestN8n('product')">보고서 생성</button>
+            <div class="result-box" id="product-result">결과화면 [cite: 3]</div>
+        </div>
+
+        <div class="section">
+            <h2>🎬 스토리만들기 [cite: 4]</h2>
+            <input type="text" id="story-context" placeholder="원하는 상황을 입력하세요 [cite: 5]">
+            <button class="btn" onclick="requestN8n('story')" style="background: var(--mint);">스토리 생성</button>
+            <div class="result-box" id="story-result">결과화면 [cite: 6]</div>
+        </div>
     </div>
 
     <script>
-        async function getData() {
-            const dataBox = document.getElementById('data-box');
-            dataBox.innerText = "데이터 요청 중...";
+        async function requestN8n(type) {
+            const inputId = type === 'product' ? 'product-name' : 'story-context';
+            const resultId = type === 'product' ? 'product-result' : 'story-result';
+            const inputValue = document.getElementById(inputId).value;
+            const resultBox = document.getElementById(resultId);
 
-            // ⚠️ 나중에 n8n Webhook URL이 생기면 아래 주소를 교체하세요!
-            const N8N_URL = 'https://allbarun7.app.n8n.cloud/webhook/faeecd46-9075-4974-8bf6-41656b8067ec';
+            if(!inputValue) { alert('내용을 입력해주세요!'); return; }
+
+            resultBox.innerText = "AI가 생각 중입니다...💭";
+
+            // ⚠️ n8n Webhook URL을 본인의 것으로 교체하세요!
+            const N8N_URL = 'https://allbarun7.app.n8n.cloud/webhook/your-id';
 
             try {
-                const response = await fetch(N8N_URL);
-                const result = await response.json();
-                dataBox.innerText = JSON.stringify(result, null, 2);
+                // n8n으로 데이터를 보낼 때 'type'과 'value'를 같이 보냅니다.
+                const response = await fetch(N8N_URL + `?type=${type}&query=${encodeURIComponent(inputValue)}`);
+                const data = await response.json();
+                
+                // n8n 응답 데이터 표시 (n8n에서 { "output": "결과내용" } 형식으로 준다고 가정)
+                resultBox.innerText = data.output || JSON.stringify(data);
             } catch (error) {
-                dataBox.innerText = "에러: URL이 연결되지 않았거나 CORS 설정이 필요합니다.";
+                resultBox.innerText = "❌ 연결 에러가 발생했습니다.";
             }
         }
     </script>
